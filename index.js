@@ -190,7 +190,7 @@ client.on('messageCreate', async function(message) {
     let prefix = client.cache.get(`prefix_${message.guild.id}`);
     if (!prefix) {
         const guildConfig = await client.schemas.GuildConfig.findOne({ Guild: message.guild.id });
-        if (guildConfig.Prefix) {
+        if (guildConfig?.Prefix) {
             client.cache.set(`prefix_${message.guild.id}`, guildConfig.Prefix);
             prefix = client.cache.get(`prefix_${message.guild.id}`);
         }
