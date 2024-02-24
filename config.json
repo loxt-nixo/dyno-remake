@@ -1,0 +1,10 @@
+{
+    "TOKEN": "Bot Token",
+    "APP_ID": "Client ID",
+    "APP_SECRET": "Client Secret",
+    "prefix": "?",
+    "mongodb": "Mongodb url",
+    "embedSuccess": "#43b582",
+    "embedError": "#f04a47",
+    "developers": ["Developer ids"]
+}

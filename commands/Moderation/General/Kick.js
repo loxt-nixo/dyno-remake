@@ -1,0 +1,48 @@
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js')
+
+module.exports = {
+    data: new SlashCommandBuilder()
+    .setName('kick')
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+    .setDescription('Kick a member')
+    .addUserOption(opt => opt
+        .setName('user')
+        .setDescription('User to kick')
+        .setRequired(true))
+    .addStringOption(opt => opt
+        .setName('reason')
+        .setDescription('Reason for the kick')
+        .setRequired(false)),
+    execute: async function (interaction, client) {
+        const user = interaction.options.getMember('user');
+        const reason = interaction.options.getString('reason') || '*No reason specified.*';
+
+        const modCheck = await client.checkMod(interaction.member._roles, interaction.guild.id);
+
+        if (!modCheck && !interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) return;
+
+        let embed;
+
+        if (user.kickable) {
+            embed = {
+                description: `<:success:1205124560622456832> ***${user.user.tag} was kicked.***`,
+                color: 0x43b582
+            }
+            await client.modLog(user, interaction.member, interaction.guild.id, 'Kick', reason, null);
+            const dmEmbed = {
+                color: client.hexToInt(client.config.embedError),
+                description: `You were kicked from ${interaction.guild.name}. | ${reason}`
+            }
+            user.send({ embeds: [dmEmbed] }).catch(() => {})
+            user.kick({ reason: reason });
+            interaction.reply({ embeds: [embed] })
+        } else {
+            embed = {
+                description: `<:error:1205124558638813194> I can't kick ${user.user.tag}`,
+                color: client.hexToInt(client.config.embedError)
+            }
+
+            interaction.reply({ embeds: [embed], ephemeral: true })
+        }
+    }
+}
