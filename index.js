@@ -107,6 +107,53 @@ client.on('ready', async function () {
     }
 
     client.schemas = require('./utils/SchemaLoader.js')();
+
+    setInterval(async () => {
+        const giveaways = await client.schemas.Giveaway.find({ Ended: false });
+
+        for (const giveaway of giveaways) {
+            if (Date.now() >= giveaway.EndsAt) {
+                const channel = client.channels.cache.get(giveaway.Channel)
+                
+                if (!channel) {
+                    channel = await client.channels.fetch(giveaway.Channel);
+
+                    if (!channel) return;
+                }
+
+                const winners = selectWinners(giveaway.Entries, giveaway.Winners);
+                const text = winners.map(winner => `<@${winner}>`).join(', ');
+
+                const msg = await channel.messages.fetch(giveaway.Message);
+
+                const updatedEmbed = new EmbedBuilder()
+                .setColor(0x337fd5)
+                .setTitle(giveaway.Prize)
+                .addFields(
+                    { name: 'Time Remaining', value: `**Ended!**`, inline: true },
+                    { name: 'Hosted By', value: `<@${giveaway.Creator}>`, inline: true },
+                    { name: 'Winner(s)', value: `${text}`, inline: false },
+                )
+                .setFooter({ text: `${giveaway.Winners} winners | Ended At` })
+                .setTimestamp()
+
+                await msg.edit({ embeds: [updatedEmbed] });
+
+                channel.send({ content: `Congratulations ${text}, you won ${giveaway.Prize}!` });
+
+                giveaway.Ended = true;
+                await giveaway.save();
+            }
+        }
+
+        function selectWinners(participants, count) {
+            for (let i = participants.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [participants[i], participants[j]] = [participants[j], participants[i]];
+            }
+            return participants.slice(0, count);
+        }
+    }, 5_000);
 });
 
 
