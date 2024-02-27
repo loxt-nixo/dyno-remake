@@ -1,6 +1,6 @@
 # Dyno Remake
 
-**Note: If you use this bot, please remember to give proper credits to arnsfh and manta_maahil!**
+**Note: If you use this bot, please remember to give proper credits to arnsfh and manta_maahil**
 
 ## Bot Configurations:
 
